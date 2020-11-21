@@ -1,0 +1,326 @@
+---
+title: "hypervolume metrics_minimum traits"
+author: "Tim Ohlert"
+date: "11/21/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### This code is meant to calculate hypervolume metrics for all Sevilleta control plots for all time. It's computationally intensive but can be completed with enough time on a simple computer as long as the number of traits is kept to a minumum
+
+
+
+# Add libraries
+
+
+```{r}
+library(plyr)
+library(hypervolume)
+library(lmerTest)
+library(visreg)
+library(emmeans)
+library(tidyverse)
+library(ggthemes)
+library(MuMIn)
+library(dplyr)
+library(BAT)
+library(beepr)
+library(ggcorrplot)
+```
+
+
+# load data and clean
+
+## load plant community data
+
+```{r}
+corebiomass <- read.csv("~/Misc Grad school/Sevilleta_allbiomass_22Jan2020.csv")
+
+```
+
+## reduce data to fall controls and summarize including calculating percent abundance of species within communities
+
+```{r}
+core_5 <- subset(corebiomass,
+                 treatment == "C" &
+                   season == "fall"
+                 )
+
+core_3 <- ddply(core_5, c("site", "year", "web", "transect", "block", "plot", "subplot", "quad"),
+                function(x)data.frame(
+                  plot.cover = sum(x$cover)
+                ))
+
+
+core_2 <- merge(core_3, core_5, by = c("site", "year", "web", "transect", "block", "plot", "subplot", "quad"))
+core_2$percent.abundance <- core_2$cover/core_2$plot.cover
+
+#calculate number of species in each plot 
+core_obs_number <- ddply(core_2, c("site", "year", "web", "transect", "block", "plot", "subplot", "quad"),
+                         function(x)data.frame(
+                           obs.number = as.numeric(length(x$kartez))
+                         ))
+
+#remove plots with only a few species because otherwise the hypervolume doesn't work
+core_1 <- merge(core_2, core_obs_number, by = c("site", "year", "web", "transect", "block", "plot", "subplot", "quad"))
+#core <- subset(core_1, obs.number > 3)
+```
+
+
+## load trait data and combine with community data
+
+```{r}
+sev_traits <- read.csv("~/Misc Grad school/Traits/sev_all_traits_Nov2018_with_metadata_TEF.csv")
+core_trait <- merge(core_1, sev_traits, by = "kartez")
+```
+
+
+
+## prep trait data
+
+###make list of only the species in the study in preparation for z-score
+
+```{r}
+unique.kartez.core <- ddply(core_trait, c( "avg.height_A", "avg.height_B", "avg.height_C", "avg.height_F", "ldmc", "sla", "lma", "area", "d15N", "d13C", "pN", "pC", "cn", "sdmc", "rdmc", "sdens", "rdens", "seed_mass"),
+                            function(x)data.frame(
+                              kartez = unique(x$kartez)
+                            ))
+```
+
+
+
+
+### make z-scores
+
+```{r}
+unique.kartez.core$avg.height_A.z <- scale(unique.kartez.core$avg.height_A, center=TRUE, scale = TRUE)
+unique.kartez.core$avg.height_B.z <- scale(unique.kartez.core$avg.height_B, center=TRUE, scale = TRUE)
+unique.kartez.core$avg.height_C.z <- scale(unique.kartez.core$avg.height_C, center=TRUE, scale = TRUE)
+unique.kartez.core$avg.height_F.z <- scale(unique.kartez.core$avg.height_F, center=TRUE, scale = TRUE)
+unique.kartez.core$ldmc.z <- scale(unique.kartez.core$ldmc, center=TRUE, scale = TRUE)
+unique.kartez.core$sla.z <- scale(unique.kartez.core$sla, center=TRUE, scale = TRUE)
+unique.kartez.core$lma.z <- scale(unique.kartez.core$lma, center=TRUE, scale = TRUE)
+unique.kartez.core$area.z <- scale(unique.kartez.core$area, center=TRUE, scale = TRUE)
+unique.kartez.core$d15N.z <- scale(unique.kartez.core$d15N, center=TRUE, scale = TRUE)
+unique.kartez.core$d13C.z <- scale(unique.kartez.core$d13C, center=TRUE, scale = TRUE)
+unique.kartez.core$pN.z <- scale(unique.kartez.core$pN, center=TRUE, scale = TRUE)
+unique.kartez.core$pC.z <- scale(unique.kartez.core$pC, center=TRUE, scale = TRUE)
+unique.kartez.core$cn.z <- scale(unique.kartez.core$cn, center=TRUE, scale = TRUE)
+unique.kartez.core$sdmc.z <- scale(unique.kartez.core$sdmc, center=TRUE, scale = TRUE)
+unique.kartez.core$rdmc.z <- scale(unique.kartez.core$rdmc, center=TRUE, scale = TRUE)
+unique.kartez.core$sdens.z <- scale(unique.kartez.core$sdens, center=TRUE, scale = TRUE)
+unique.kartez.core$rdens.z <- scale(unique.kartez.core$rdens, center=TRUE, scale = TRUE)
+unique.kartez.core$seed_mass.z <- scale(unique.kartez.core$seed_mass, center=TRUE, scale = TRUE)
+```
+
+
+
+
+
+# check how highly correlated the traits are
+
+```{r}
+cor_frame <- ddply(unique.kartez.core, c("kartez", "avg.height_A", "sla", "ldmc", "sdens", "area", "d15N", "d13C", "pN", "pC", "cn", "sdmc", "rdmc", "rdens", "seed_mass"),
+                   function(x)data.frame(
+                     obs = length(x$kartez)
+                   ))
+
+summary(cor_frame)
+cor <- cor(na.omit(cor_frame[,2:15]), use = "everything")
+
+ggcorrplot(cor)
+```
+
+
+
+
+# prep data for hypervolume computation
+
+## combine z scores with community data
+
+```{r}
+core_trait_z.1 <- merge(unique.kartez.core, core_trait, by = "kartez", all.y=TRUE)
+summary(core_trait_z.1)
+core_trait_z.1 <- subset(core_trait_z.1, treatment == "C")
+
+core_trait_z.1 <- unite(core_trait_z.1, replicate, c("site","web","plot","quad","transect","plot","subplot"), sep=".",remove=FALSE)
+```
+
+## remove columns with missing trait values for the traits of interest
+
+```{r}
+core_trait_z.1 <- subset(core_trait_z.1, avg.height_A.z != "NA" & sla.z != "NA" & rdmc.z!= "NA" & seed_mass.z!= "NA" )
+
+```
+
+
+## create some helpful columns
+
+```{r}
+core_trait_z.1 <- unite(core_trait_z.1, rep_year, c("replicate", "year"), sep = "-", remove = FALSE)
+core_trait_z.1 <- unite(core_trait_z.1, site_year, c("site", "year"), sep = "-", remove = FALSE)
+
+```
+
+
+# creating hypervolume objects
+
+ #test <- subset(core_trait_z.1, year != "2009"
+   #            & year != "2010"
+    #           & year != "2017"
+     #          #year <= "2000"
+      #         # site == "core_black" 
+       #        #| site == "EDGE_blue"
+        #       #& replicate == "core_blue.1.N.3.NA.NA"	
+         #      # replicate == "core_black.5.E.1.NA.NA"
+          #     )
+ #test <- ddply(test, .(rep_year), function(x){subset(test, length(test$kartez) > 1)})
+
+ #something <- dlply(test, .(site_year),
+ #                   function(x){split(test[,c("avg.height_A.z", "sla.z", "ldmc.z", "sdens.z", "area.z", "d15N.z", "d13C.z", "pN.z", "pC.z", "sdmc.z", "rdmc.z", "seed_mass.z")], test$rep_year)})
+
+
+ #traits to use c("avg.height_A.z", "sla.z", "ldmc.z", "sdens.z", "area.z", "d15N.z", "d13C.z", "pN.z", "pC.z", "sdmc.z", "rdmc.z", "seed_mass.z")
+
+## makes a list oll the communities with matrixes of only the traits of interest
+
+```{r}
+hv_split <- base::split(core_trait_z.1[,c("avg.height_A.z", "sla.z", "rdmc.z", "seed_mass.z")], core_trait_z.1$rep_year)
+```
+
+## there's some minimum number of species obs necessary but I don't entirely understand that yet
+
+```{r}
+hv_split <- subset(hv_split, lapply(hv_split, nrow) >2)
+```
+
+
+
+
+## administrative stuff for running cores in parallel
+
+```{r}
+library(parallel)
+numCores <- detectCores()
+cl <- makeCluster(numCores)
+
+
+clusterEvalQ(cl, {library(plyr)
+  library(hypervolume)
+  library(lmerTest)
+  library(visreg)
+  library(emmeans)
+  library(tidyverse)
+  library(ggthemes)
+  library(MuMIn)
+  library(dplyr)
+  library(BAT)
+})
+```
+
+
+
+ #hv_func <- function(x) {
+ #  hypervolume_gaussian(data = x, name = x$rep_year)
+ #}
+
+ #hv_volumes <- lapply(hv_split,  hypervolume_gaussian)
+
+ #cat(paste0('start time: ', time_start <- Sys.time()), '\n')
+
+## TIME WARNING: this takes a while to run. Can crash computer
+```{r}
+hv_volumes <- parLapply(cl,  hv_split, hypervolume_gaussian)
+
+beep(sound = 5)
+```
+
+
+
+ #cat(paste0('time elapsed: ', Sys.time()-time_start), '\n')
+
+
+
+ #names(hv_volumes) <- names(hv_split) #maybe this will grab the lost names
+
+ #hvs_joined = hypervolume_join(hv_volumes)
+
+
+ #test2 <- subset(core_trait_z.1, #year != "2009"
+ #              #& year != "2010"
+  #             #& year != "2017"
+   #            year == "2000"
+    #           #& site == "core_black" 
+     #          #| site == "EDGE_blue"
+      #         #& replicate == "core_blue.1.N.3.NA.NA"	
+       #        & replicate == "core_black.5.E.1.NA.NA"
+        #        )
+
+
+##################for testing, delete later
+#x <- test[,c("avg.height_A.z", "sla.z", "ldmc.z", "sdens.z", "area.z", "d15N.z", "d13C.z", "pN.z", "pC.z", "sdmc.z", "rdmc.z", "seed_mass.z")]
+#y <- test2[,c("avg.height_A.z", "sla.z", "ldmc.z", "sdens.z", "area.z", "d15N.z", "d13C.z", "pN.z", "pC.z", "sdmc.z", "rdmc.z", "seed_mass.z")]
+
+#something <- list(x,y)
+
+#hv_volumes <- lapply(something, hv_func)
+
+#hvs_joined = hypervolume_join(hv_volumes)
+
+#alpha <- kernel.alpha(hvs_joined)
+##################
+
+## calculate the metrics based on th hyervolumes. Eventually I'll have to figure out beta diversity
+
+```{r}
+alpha <- sapply(hv_volumes, kernel.alpha)
+evenness <- sapply(hv_volumes, kernel.evenness)
+dispersion <- sapply(hv_volumes, kernel.dispersion)
+originality <- sapply(hv_volumes, kernel.originality) # is this like functional redundancy?
+```
+
+
+
+
+## merge the metrics with the cliamte data
+
+```{r}
+rep_year <- names(hv_volumes)
+hv_div <- data.frame(rep_year, alpha, evenness, dispersion, originality)
+hv_div <- separate(hv_div, rep_year, c("replicate", "year"), sep = "-")
+
+pre_climate <- unite(core_5, replicate, c("site","web","plot","quad","transect","plot","subplot"), sep=".",remove=FALSE)
+climate <- pre_climate[,c("replicate", "year", "site","web","plot","quad","transect","plot","subplot", "SPEI.comp")]
+climate <- unique(climate)
+
+
+hv_climate <- merge(hv_div, climate, by = c("replicate", "year"), all.x = TRUE)
+hv_climate$log_alpha <- log(hv_climate$alpha)
+```
+
+## write a csv with all the metrics
+
+```{r}
+write.csv(hv_climate, "hv_climate-11.21.20.csv")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
