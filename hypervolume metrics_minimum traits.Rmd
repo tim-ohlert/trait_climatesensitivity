@@ -152,7 +152,7 @@ core_trait_z.1 <- unite(core_trait_z.1, replicate, c("site","web","plot","quad",
 ## remove columns with missing trait values for the traits of interest
 
 ```{r}
-core_trait_z.1 <- subset(core_trait_z.1, avg.height_A.z != "NA" & sla.z != "NA" & rdmc.z!= "NA" & seed_mass.z!= "NA" )
+core_trait_z.1 <- subset(core_trait_z.1, avg.height_A.z != "NA" & sla.z != "NA"  & seed_mass.z!= "NA" )
 
 ```
 
@@ -188,7 +188,7 @@ core_trait_z.1 <- unite(core_trait_z.1, site_year, c("site", "year"), sep = "-",
 ## makes a list oll the communities with matrixes of only the traits of interest
 
 ```{r}
-hv_split <- base::split(core_trait_z.1[,c("avg.height_A.z", "sla.z", "rdmc.z", "seed_mass.z")], core_trait_z.1$rep_year)
+hv_split <- base::split(core_trait_z.1[,c("avg.height_A.z", "sla.z", "seed_mass.z")], core_trait_z.1$rep_year)
 ```
 
 ## there's some minimum number of species obs necessary but I don't entirely understand that yet
@@ -289,7 +289,7 @@ originality <- sapply(hv_volumes, kernel.originality) # is this like functional 
 
 ```{r}
 rep_year <- names(hv_volumes)
-hv_div <- data.frame(rep_year, alpha, evenness, dispersion, originality)
+hv_div <- data.frame(rep_year, alpha, evenness, dispersion)
 hv_div <- separate(hv_div, rep_year, c("replicate", "year"), sep = "-")
 
 pre_climate <- unite(core_5, replicate, c("site","web","plot","quad","transect","plot","subplot"), sep=".",remove=FALSE)
@@ -304,7 +304,7 @@ hv_climate$log_alpha <- log(hv_climate$alpha)
 ## write a csv with all the metrics
 
 ```{r}
-write.csv(hv_climate, "hv_climate-11.21.20.csv")
+write.csv(hv_climate, "hv_climate-11.22.20.csv")
 ```
 
 
