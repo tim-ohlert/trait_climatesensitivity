@@ -1,0 +1,191 @@
+---
+title: "figures"
+author: "Tim Ohlert"
+date: "11/23/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+#load libraries
+```{r}
+library(lmerTest)
+library(visreg)
+library(MuMIn)
+library(ggeffects)
+library(ggthemes)
+library(tidyverse)
+```
+
+
+# load data
+
+```{r}
+hv_climate <- read_csv("hv_climate-11.22.20.csv")
+```
+
+
+
+
+
+
+# alpha diversity
+
+## model comparison
+
+```{r}
+alphamod.1 <- lmer(log_alpha ~ SPEI.comp + (1|year/site), data = hv_climate)
+alphamod.2 <- lmer(log_alpha ~ SPEI.comp + I(SPEI.comp^2) + (1|year/site), data = hv_climate)
+alphamod.3 <- lmer(log_alpha ~ SPEI.comp  + I(SPEI.comp^2) + I(SPEI.comp^3) + (1|year/site), data = hv_climate)
+alphamod.4 <- lmer(log_alpha ~ SPEI.comp + I(SPEI.comp^2) + I(SPEI.comp^3) + I(SPEI.comp^4) + (1|year/site), data = hv_climate)
+alphamod.5 <- lmer(log_alpha ~ SPEI.comp + I(SPEI.comp^2) + I(SPEI.comp^3) + I(SPEI.comp^4) + I(SPEI.comp^5) + (1|year/site), data = hv_climate)
+
+AICc(alphamod.1, alphamod.2, alphamod.3, alphamod.4, alphamod.5)
+
+```
+
+```{r}
+summary(alphamod.1)
+r.squaredGLMM(alphamod.1)
+```
+
+
+
+## graph
+
+```{r}
+x <- ggpredict(alphamod.1, c("SPEI.comp"))
+plot(x, ci=FALSE)+
+  geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
+  geom_point(data=hv_climate, aes(x=SPEI.comp,y=log_alpha))+
+  theme_base()
+```
+
+
+
+
+
+
+
+
+# evenness
+
+## model comparison
+
+```{r}
+evenmod.1 <- lmer(evenness ~ SPEI.comp + (1|year/site), data = hv_climate)
+evenmod.2 <- lmer(evenness ~ SPEI.comp + I(SPEI.comp^2) + (1|year/site), data = hv_climate)
+evenmod.3 <- lmer(evenness ~ SPEI.comp  + I(SPEI.comp^2) + I(SPEI.comp^3) + (1|year/site), data = hv_climate)
+evenmod.4 <- lmer(evenness ~ SPEI.comp + I(SPEI.comp^2) + I(SPEI.comp^3) + I(SPEI.comp^4) + (1|year/site), data = hv_climate)
+evenmod.5 <- lmer(evenness ~ SPEI.comp + I(SPEI.comp^2) + I(SPEI.comp^3) + I(SPEI.comp^4) + I(SPEI.comp^5) + (1|year/site), data = hv_climate)
+
+AICc(evenmod.1, evenmod.2, evenmod.3, evenmod.4, evenmod.5)
+```
+
+
+```{r}
+summary(evenmod.1)
+r.squaredGLMM(evenmod.1)
+```
+
+
+## graph
+
+```{r}
+x <- ggpredict(evenmod.1, c("SPEI.comp"))
+plot(x, ci=FALSE)+
+  geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
+  geom_point(data=hv_climate, aes(x=SPEI.comp,y=evenness))+
+  theme_base()
+```
+
+
+
+
+
+
+# dispersion
+
+## model comparison
+
+```{r}
+dispmod.1 <- lmer(dispersion ~ SPEI.comp + (1|year/site), data = hv_climate)
+dispmod.2 <- lmer(dispersion ~ SPEI.comp + I(SPEI.comp^2) + (1|year/site), data = hv_climate)
+dispmod.3 <- lmer(dispersion ~ SPEI.comp  + I(SPEI.comp^2) + I(SPEI.comp^3) + (1|year/site), data = hv_climate)
+dispmod.4 <- lmer(dispersion ~ SPEI.comp + I(SPEI.comp^2) + I(SPEI.comp^3) + I(SPEI.comp^4) + (1|year/site), data = hv_climate)
+dispmod.5 <- lmer(dispersion ~ SPEI.comp + I(SPEI.comp^2) + I(SPEI.comp^3) + I(SPEI.comp^4) + I(SPEI.comp^5) + (1|year/site), data = hv_climate)
+
+AICc(dispmod.1, dispmod.2, dispmod.3, dispmod.4, dispmod.5)
+```
+
+```{r}
+summary(dispmod.1)
+r.squaredGLMM(dispmod.1)
+```
+
+
+## graph
+
+```{r}
+x <- ggpredict(dispmod.1, c("SPEI.comp"))
+plot(x, ci=FALSE)+
+  geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
+  geom_point(data=hv_climate, aes(x=SPEI.comp,y=dispersion))+
+  theme_base()
+```
+
+
+
+
+```{r}
+hist(hv_climate$dispersion)
+```
+
+
+
+
+
+
+                       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
