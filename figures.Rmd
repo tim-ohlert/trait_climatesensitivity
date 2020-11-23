@@ -19,6 +19,7 @@ library(MuMIn)
 library(ggeffects)
 library(ggthemes)
 library(tidyverse)
+library(viridis)
 ```
 
 
@@ -55,17 +56,32 @@ r.squaredGLMM(alphamod.1)
 
 
 
+
+
+
+
+
+
 ## graph
 
 ```{r}
 x <- ggpredict(alphamod.1, c("SPEI.comp"))
 plot(x, ci=FALSE)+
   geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
-  geom_point(data=hv_climate, aes(x=SPEI.comp,y=log_alpha))+
+  geom_point(data=hv_climate, aes(x=SPEI.comp,y=log_alpha, colour = site))+
+  scale_color_viridis(discrete = TRUE, option = "D")+
   theme_base()
 ```
 
 
+```{r}
+ggplot(hv_climate, aes(SPEI.comp,log_alpha))+
+  facet_wrap(~site)+
+  geom_smooth(method = "lm")+
+  geom_point(data=hv_climate, aes(x=SPEI.comp,y=log_alpha, colour = site))+
+  scale_color_viridis(discrete = TRUE, option = "D")+
+  theme_base()
+```
 
 
 
@@ -104,7 +120,14 @@ plot(x, ci=FALSE)+
 ```
 
 
-
+```{r}
+ggplot(hv_climate, aes(SPEI.comp,evenness))+
+  facet_wrap(~site)+
+  geom_smooth(method = "lm")+
+  geom_point(data=hv_climate, aes(x=SPEI.comp,y=evenness, colour = site))+
+  scale_color_viridis(discrete = TRUE, option = "D")+
+  theme_base()
+```
 
 
 
@@ -135,6 +158,15 @@ x <- ggpredict(dispmod.1, c("SPEI.comp"))
 plot(x, ci=FALSE)+
   geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
   geom_point(data=hv_climate, aes(x=SPEI.comp,y=dispersion))+
+  theme_base()
+```
+
+```{r}
+ggplot(hv_climate, aes(SPEI.comp,dispersion))+
+  facet_wrap(~site)+
+  geom_smooth(method = "lm")+
+  geom_point(data=hv_climate, aes(x=SPEI.comp,y=dispersion, colour = site))+
+  scale_color_viridis(discrete = TRUE, option = "D")+
   theme_base()
 ```
 
