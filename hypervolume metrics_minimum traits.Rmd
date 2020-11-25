@@ -222,18 +222,23 @@ clusterEvalQ(cl, {library(plyr)
 ```
 
 
+## make function to help pass hypervolume arguments through lapply
 
- #hv_func <- function(x) {
- #  hypervolume_gaussian(data = x, name = x$rep_year)
- #}
+```{r}
+ hv_func <- function(x) {
+  hypervolume_gaussian(data = x, weight = "percent.abundance", chunk.size = 500)
+ }
+```
+
+
 
  #hv_volumes <- lapply(hv_split,  hypervolume_gaussian)
 
  #cat(paste0('start time: ', time_start <- Sys.time()), '\n')
 
 ## TIME WARNING: this takes a while to run. Can crash computer
-```{r}
-hv_volumes <- parLapply(cl,  hv_split, hypervolume_gaussian)
+```{r, results = 'hide'}
+hv_volumes <- parLapply(cl,  hv_split, hv_func)
 
 beep(sound = 5)
 ```
@@ -275,7 +280,7 @@ beep(sound = 5)
 
 ## calculate the metrics based on th hyervolumes. Eventually I'll have to figure out beta diversity
 
-```{r}
+```{r, results = 'hide'}
 alpha <- sapply(hv_volumes, kernel.alpha)
 evenness <- sapply(hv_volumes, kernel.evenness)
 dispersion <- sapply(hv_volumes, kernel.dispersion)
@@ -304,7 +309,7 @@ hv_climate$log_alpha <- log(hv_climate$alpha)
 ## write a csv with all the metrics
 
 ```{r}
-write.csv(hv_climate, "hv_climate-11.22.20.csv")
+write.csv(hv_climate, "hv_climate-11.24.20.csv")
 ```
 
 
