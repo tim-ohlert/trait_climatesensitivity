@@ -188,7 +188,7 @@ core_trait_z.1 <- unite(core_trait_z.1, site_year, c("site", "year"), sep = "-",
 ## makes a list oll the communities with matrixes of only the traits of interest
 
 ```{r}
-hv_split <- base::split(core_trait_z.1[,c("avg.height_A.z", "sla.z", "seed_mass.z")], core_trait_z.1$rep_year)
+hv_split <- base::split(core_trait_z.1[,c("avg.height_A.z", "sla.z", "seed_mass.z", "percent.abundance")], core_trait_z.1$rep_year)
 ```
 
 ## there's some minimum number of species obs necessary but I don't entirely understand that yet
@@ -226,7 +226,7 @@ clusterEvalQ(cl, {library(plyr)
 
 ```{r}
  hv_func <- function(x) {
-  hypervolume_gaussian(data = x, weight = "percent.abundance", chunk.size = 500)
+  hypervolume_gaussian(data = x[,1:3], weight = x$percent.abundance, verbose = FALSE, chunk.size = 250)
  }
 ```
 
@@ -243,6 +243,90 @@ hv_volumes <- parLapply(cl,  hv_split, hv_func)
 beep(sound = 5)
 ```
 
+## Make a list of lists for beta diversity calculations
+```{r, results = 'hide', message = FALSE}
+
+
+hv_split_beta <- base::split(core_trait_z.1[,c("avg.height_A.z", "sla.z", "seed_mass.z", "percent.abundance", "replicate")], f = core_trait_z.1$site_year)
+
+
+
+
+hv_split_beta_replicates <- lapply(hv_split_beta, function(x) split(x, x$replicate))
+
+
+remove_replicate_column_func <- function(y) {
+  lapply(y, function(z) { z["replicate"] <- NULL; z })
+}
+
+
+
+hv_split_beta_replicates <- lapply(hv_split_beta_replicates, remove_replicate_column_func)
+
+n_rowcheck <- function(p) {
+  subset(p,(lapply(p, nrow) > 2) == TRUE)
+}
+
+hv_split_beta_replicates <- lapply(hv_split_beta_replicates, n_rowcheck)
+
+
+list_hv <- function(i) {
+  lapply(i, FUN = hv_func)
+}
+
+hv_volumes_beta <- lapply(hv_split_beta_replicates, FUN = list_hv)
+
+
+```
+
+
+## actually calculate beta diversity for each site-year combination
+```{r}
+michael <- lapply(hv_volumes_beta, hypervolume_join)
+beta <- parLapply(cl, michael, kernel.beta)
+
+
+
+```
+
+## extract beta diversity matrixes by changing to vectors
+
+```{r}
+extract_beta <- function(dunder) {
+  lapply(dunder, as.vector)
+}
+
+beta_scores <- lapply(beta, extract_beta)
+
+mifflin <- lapply(beta_scores, as.data.frame)
+
+
+betascores_df <- ldply(mifflin, data.frame)
+
+```
+
+
+## combine the beta diversity scores with climate data
+```{r}
+
+betascores_df <- separate(betascores_df, .id, c("site", "year"), sep="-")
+
+
+climate_beta <- core_5[,c("year", "site", "SPEI.comp")]
+climate_beta <- unique(climate_beta)
+
+
+
+hv_climate_beta <- merge(betascores_df, climate_beta, by = c("site", "year"), all.x = TRUE)
+
+```
+
+
+## write csv of beta diversity values
+
+```{r}
+write.csv(hv_climate_beta, "hv_climate_beta-11.25.20.csv")
+```
 
 
  #cat(paste0('time elapsed: ', Sys.time()-time_start), '\n')
@@ -280,11 +364,11 @@ beep(sound = 5)
 
 ## calculate the metrics based on th hyervolumes. Eventually I'll have to figure out beta diversity
 
-```{r, results = 'hide'}
+```{r, results = 'hide', message = FALSE}
 alpha <- sapply(hv_volumes, kernel.alpha)
 evenness <- sapply(hv_volumes, kernel.evenness)
 dispersion <- sapply(hv_volumes, kernel.dispersion)
-originality <- sapply(hv_volumes, kernel.originality) # is this like functional redundancy?
+#originality <- sapply(hv_volumes, kernel.originality) # is this like functional redundancy?
 ```
 
 
@@ -309,7 +393,7 @@ hv_climate$log_alpha <- log(hv_climate$alpha)
 ## write a csv with all the metrics
 
 ```{r}
-write.csv(hv_climate, "hv_climate-11.24.20.csv")
+write.csv(hv_climate, "hv_climate-11.25.20.csv")
 ```
 
 
