@@ -39,7 +39,9 @@ hv_climate <- read_csv("hv_climate-11.25.20.csv")
 ## model comparison
 
 ```{r}
-alphamod.1 <- lmer(log_alpha ~ SPEI.comp + (1|year/site), data = hv_climate)
+alphamod.1 <- lmer(log_alpha ~ SPEI.comp + (1|year/site), data = hv_climate) # for a location, are SPEI changes through time associated with alpha?
+alphamod.1 <- lmer(log_alpha~SPEI.comp*site + (1|year) + (1|replicate), data = hv_climate) # within-site diversity change. At whih sites are SPEI changes through time related to alpha?
+ 
 alphamod.2 <- lmer(log_alpha ~ SPEI.comp + I(SPEI.comp^2) + (1|year/site), data = hv_climate)
 alphamod.3 <- lmer(log_alpha ~ SPEI.comp  + I(SPEI.comp^2) + I(SPEI.comp^3) + (1|year/site), data = hv_climate)
 alphamod.4 <- lmer(log_alpha ~ SPEI.comp + I(SPEI.comp^2) + I(SPEI.comp^3) + I(SPEI.comp^4) + (1|year/site), data = hv_climate)
