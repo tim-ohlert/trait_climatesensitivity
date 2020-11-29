@@ -40,7 +40,7 @@ hv_climate <- read_csv("hv_climate-11.25.20.csv")
 
 ```{r}
 alphamod.1 <- lmer(log_alpha ~ SPEI.comp + (1|year/site), data = hv_climate) # for a location, are SPEI changes through time associated with alpha?
-alphamod.1 <- lmer(log_alpha~SPEI.comp*site + (1|year) + (1|replicate), data = hv_climate) # within-site diversity change. At whih sites are SPEI changes through time related to alpha?
+alphamod.site <- lmer(log_alpha~SPEI.comp*site + (1|year) + (1|replicate), data = hv_climate) # within-site diversity change. At whih sites are SPEI changes through time related to alpha?
  
 alphamod.2 <- lmer(log_alpha ~ SPEI.comp + I(SPEI.comp^2) + (1|year/site), data = hv_climate)
 alphamod.3 <- lmer(log_alpha ~ SPEI.comp  + I(SPEI.comp^2) + I(SPEI.comp^3) + (1|year/site), data = hv_climate)
@@ -65,6 +65,10 @@ r.squaredGLMM(alphamod.1)
 
 
 ## graph
+```{r}
+hist(hv_climate$alpha)
+hist(hv_climate$log_alpha)
+```
 
 ```{r}
 x <- ggpredict(alphamod.1, c("SPEI.comp"))
@@ -96,6 +100,9 @@ ggplot(hv_climate, aes(SPEI.comp,log_alpha))+
 
 ```{r}
 evenmod.1 <- lmer(evenness ~ SPEI.comp + (1|year/site), data = hv_climate)
+evenmod.site <- lmer(evenness~ SPEI.comp*site + (1|year) + (1|replicate), data = hv_climate)
+
+
 evenmod.2 <- lmer(evenness ~ SPEI.comp + I(SPEI.comp^2) + (1|year/site), data = hv_climate)
 evenmod.3 <- lmer(evenness ~ SPEI.comp  + I(SPEI.comp^2) + I(SPEI.comp^3) + (1|year/site), data = hv_climate)
 evenmod.4 <- lmer(evenness ~ SPEI.comp + I(SPEI.comp^2) + I(SPEI.comp^3) + I(SPEI.comp^4) + (1|year/site), data = hv_climate)
@@ -108,6 +115,8 @@ AICc(evenmod.1, evenmod.2, evenmod.3, evenmod.4, evenmod.5)
 ```{r}
 summary(evenmod.1)
 r.squaredGLMM(evenmod.1)
+
+summary(evenmod.site)
 ```
 
 
@@ -139,6 +148,8 @@ ggplot(hv_climate, aes(SPEI.comp,evenness))+
 
 ```{r}
 dispmod.1 <- lmer(dispersion ~ SPEI.comp + (1|year/site), data = hv_climate)
+dispmod.site <- lmer(dispersion~ SPEI.comp*site + (1|year) + (1|replicate), data = hv_climate)
+
 dispmod.2 <- lmer(dispersion ~ SPEI.comp + I(SPEI.comp^2) + (1|year/site), data = hv_climate)
 dispmod.3 <- lmer(dispersion ~ SPEI.comp  + I(SPEI.comp^2) + I(SPEI.comp^3) + (1|year/site), data = hv_climate)
 dispmod.4 <- lmer(dispersion ~ SPEI.comp + I(SPEI.comp^2) + I(SPEI.comp^3) + I(SPEI.comp^4) + (1|year/site), data = hv_climate)
@@ -150,6 +161,7 @@ AICc(dispmod.1, dispmod.2, dispmod.3, dispmod.4, dispmod.5)
 ```{r}
 summary(dispmod.1)
 r.squaredGLMM(dispmod.1)
+summary(dispmod.site)
 ```
 
 
