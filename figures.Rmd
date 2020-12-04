@@ -26,10 +26,21 @@ library(viridis)
 # load data
 
 ```{r}
-hv_climate <- read_csv("hv_climate-11.25.20.csv")
+hv_climate_allsites <- read_csv("hv_climate-11.25.20.csv")
 ```
 
-
+```{r}
+hv_climate <- subset(hv_climate_allsites, 
+                      site != "crust_creosote" &
+                      site != "crust_grass" &
+                      site != "crust_PJ" &
+                      site != "grid_black" &
+                      site != "grid_blue" &
+                      site != "grid_creosote" &
+                      site != "iso_web" &
+                      site != "tower_west"
+                      )
+```
 
 
 
@@ -57,6 +68,9 @@ r.squaredGLMM(alphamod.1)
 ```
 
 
+```{r}
+summary(alphamod.site)
+```
 
 
 
@@ -86,7 +100,8 @@ ggplot(hv_climate, aes(SPEI.comp,log_alpha))+
   geom_smooth(method = "lm")+
   geom_point(data=hv_climate, aes(x=SPEI.comp,y=log_alpha, colour = site, alpha = .05))+
   scale_color_viridis(discrete = TRUE, option = "D")+
-  theme_base()
+  theme(legend.position = "none")#+
+  #theme_base()
 ```
 
 
@@ -137,7 +152,8 @@ ggplot(hv_climate, aes(SPEI.comp,evenness))+
   geom_smooth(method = "lm")+
   geom_point(data=hv_climate, aes(x=SPEI.comp,y=evenness, colour = site))+
   scale_color_viridis(discrete = TRUE, option = "D")+
-  theme_base()
+   theme(legend.position = "none")#+
+  #theme_base()
 ```
 
 
@@ -181,7 +197,8 @@ ggplot(hv_climate, aes(SPEI.comp,dispersion))+
   geom_smooth(method = "lm")+
   geom_point(data=hv_climate, aes(x=SPEI.comp,y=dispersion, colour = site), alpha = .05)+
   scale_color_viridis(discrete = TRUE, option = "D")+
-  theme_base()
+   theme(legend.position = "none")#+
+  #theme_base()
 ```
 
 
