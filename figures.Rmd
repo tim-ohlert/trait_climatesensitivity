@@ -211,10 +211,54 @@ hist(hv_climate$dispersion)
 
 
 
-
+# change between years
 
                        
 
+```{r}
+hv_climate_delta <- hv_climate %>% 
+  arrange(replicate, desc(year)) %>% 
+  mutate(alpha.delta = c(diff(alpha), NA)) %>%
+  mutate(logalpha.delta = c(diff(log_alpha), NA)) %>%
+  mutate(evenness.delta = c(diff(evenness), NA)) %>%
+  mutate(dispersion.delta = c(diff(dispersion), NA)) %>% 
+  mutate(spei.delta = c(diff(SPEI.comp), NA)) %>%
+  na.omit
+
+
+
+dummy <- hv_climate
+
+dummy$year <- hv_climate$year - 1
+
+dummy <- dummy %>% 
+  rename(
+    alpha.2 = alpha,
+    log_alpha.2 = log_alpha,
+    evenness.2 = evenness,
+    dispersion.2 = dispersion,
+    SPEI.comp.2 = SPEI.comp
+        )
+
+
+dummy <- dummy[,c("replicate","year", "alpha.2", "log_alpha.2", "evenness.2", "dispersion.2", "SPEI.comp.2")]
+
+
+hv_climate_prevyear <- merge(hv_climate, dummy, by = c("replicate", "year"))
+
+
+
+hv_climate_prevyear$alpha_delta <- hv_climate_prevyear$alpha - hv_climate_prevyear$alpha.2
+hv_climate_prevyear$log_alpha_delta <- hv_climate_prevyear$log_alpha - hv_climate_prevyear$log_alpha.2
+hv_climate_prevyear$evenness_delta <- hv_climate_prevyear$evenness - hv_climate_prevyear$evenness.2
+hv_climate_prevyear$dispersion_delta <- hv_climate_prevyear$dispersion - hv_climate_prevyear$dispersion.2
+hv_climate_prevyear$SPEI_delta <- hv_climate_prevyear$SPEI.comp - hv_climate_prevyear$SPEI.comp.2
+
+
+hv_climate_delta <- hv_climate_prevyear[,c("replicate", "year", "site", "alpha_delta", "log_alpha_delta", "evenness_delta", "dispersion_delta", "SPEI_delta")]
+
+
+```
 
 
 
