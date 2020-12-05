@@ -51,7 +51,6 @@ hv_climate <- subset(hv_climate_allsites,
 
 ```{r}
 alphamod.1 <- lmer(log_alpha ~ SPEI.comp + (1|year/site), data = hv_climate) # for a location, are SPEI changes through time associated with alpha?
-alphamod.site <- lmer(log_alpha~SPEI.comp*site + (1|year) + (1|replicate), data = hv_climate) # within-site diversity change. At whih sites are SPEI changes through time related to alpha?
  
 alphamod.2 <- lmer(log_alpha ~ SPEI.comp + I(SPEI.comp^2) + (1|year/site), data = hv_climate)
 alphamod.3 <- lmer(log_alpha ~ SPEI.comp  + I(SPEI.comp^2) + I(SPEI.comp^3) + (1|year/site), data = hv_climate)
@@ -68,9 +67,6 @@ r.squaredGLMM(alphamod.1)
 ```
 
 
-```{r}
-summary(alphamod.site)
-```
 
 
 
@@ -94,6 +90,26 @@ plot(x, ci=FALSE)+
 ```
 
 
+
+
+
+
+```{r}
+model.list <- lme4::lmList(log_alpha~SPEI.comp  | site, hv_climate)
+```
+
+```{r}
+
+summary(model.list)# within-site diversity change. At whih sites are SPEI changes through time related to alpha?
+
+
+```
+
+
+
+
+
+
 ```{r}
 ggplot(hv_climate, aes(SPEI.comp,log_alpha))+
   facet_wrap(~site)+
@@ -115,8 +131,6 @@ ggplot(hv_climate, aes(SPEI.comp,log_alpha))+
 
 ```{r}
 evenmod.1 <- lmer(evenness ~ SPEI.comp + (1|year/site), data = hv_climate)
-evenmod.site <- lmer(evenness~ SPEI.comp*site + (1|year) + (1|replicate), data = hv_climate)
-
 
 evenmod.2 <- lmer(evenness ~ SPEI.comp + I(SPEI.comp^2) + (1|year/site), data = hv_climate)
 evenmod.3 <- lmer(evenness ~ SPEI.comp  + I(SPEI.comp^2) + I(SPEI.comp^3) + (1|year/site), data = hv_climate)
@@ -144,6 +158,21 @@ plot(x, ci=FALSE)+
   geom_point(data=hv_climate, aes(x=SPEI.comp,y=evenness), alpha = .05)+
   theme_base()
 ```
+
+
+
+
+```{r}
+model.list <- lme4::lmList(evenness~SPEI.comp  | site, hv_climate)
+```
+
+```{r}
+
+summary(model.list)
+
+
+```
+
 
 
 ```{r}
@@ -190,6 +219,23 @@ plot(x, ci=FALSE)+
   geom_point(data=hv_climate, aes(x=SPEI.comp,y=dispersion), alpha = .05)+
   theme_base()
 ```
+
+
+
+
+```{r}
+model.list <- lme4::lmList(dispersion~SPEI.comp  | site, hv_climate)
+```
+
+```{r}
+
+summary(model.list)
+
+
+```
+
+
+
 
 ```{r}
 ggplot(hv_climate, aes(SPEI.comp,dispersion))+
