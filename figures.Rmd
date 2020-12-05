@@ -214,7 +214,7 @@ hist(hv_climate$dispersion)
 # change between years
 
                        
-
+## make delta metrics
 ```{r}
 hv_climate_delta <- hv_climate %>% 
   arrange(replicate, desc(year)) %>% 
@@ -262,6 +262,43 @@ hv_climate_delta <- hv_climate_prevyear[,c("replicate", "year", "site", "alpha_d
 
 
 
+## model alpha change
+```{r}
+alphamod.1 <- lmer(log_alpha_delta ~ SPEI_delta + (1|year/site), data = hv_climate_delta) # for a location, are SPEI changes through time associated with alpha?
+alphamod.site <- lmer(log_alpha_delta~SPEI_delta*site + (1|year) + (1|replicate), data = hv_climate_delta) # within-site diversity change. At whih sites are SPEI changes through time related to alpha?
+ 
+alphamod.2 <- lmer(log_alpha_delta ~ SPEI_delta + I(SPEI_delta^2) + (1|year/site), data = hv_climate_delta)
+alphamod.3 <- lmer(log_alpha_delta ~ SPEI_delta  + I(SPEI_delta^2) + I(SPEI_delta^3) + (1|year/site), data = hv_climate_delta)
+alphamod.4 <- lmer(log_alpha_delta ~ SPEI_delta + I(SPEI_delta^2) + I(SPEI_delta^3) + I(SPEI_delta^4) + (1|year/site), data = hv_climate_delta)
+alphamod.5 <- lmer(log_alpha_delta ~ SPEI_delta + I(SPEI_delta^2) + I(SPEI_delta^3) + I(SPEI_delta^4) + I(SPEI_delta^5) + (1|year/site), data = hv_climate_delta)
+
+AICc(alphamod.1, alphamod.2, alphamod.3, alphamod.4, alphamod.5)
+
+```
+
+```{r}
+summary(alphamod.1)
+r.squaredGLMM(alphamod.1)
+```
+
+
+```{r}
+summary(alphamod.site)
+```
+
+
+## graph alpha change
+
+```{r}
+x <- ggpredict(alphamod.1, c("SPEI_delta"))
+plot(x, ci=FALSE)+
+  geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
+  geom_point(data=hv_climate_delta, aes(x=SPEI_delta,y=log_alpha_delta, colour = site, alpha = .05))+
+  scale_color_viridis(discrete = TRUE, option = "D")+
+  geom_hline(yintercept = 0)+
+  geom_vline(xintercept = 0)+
+  theme_base()
+```
 
 
 
@@ -269,6 +306,60 @@ hv_climate_delta <- hv_climate_prevyear[,c("replicate", "year", "site", "alpha_d
 
 
 
+```{r}
+ggplot(hv_climate_delta, aes(SPEI_delta,log_alpha_delta))+
+  facet_wrap(~site)+
+  geom_smooth(method = "lm")+
+  geom_point(data=hv_climate_delta, aes(x=SPEI_delta,y=log_alpha_delta, colour = site, alpha = .05))+
+  scale_color_viridis(discrete = TRUE, option = "D")+
+  geom_hline(yintercept = 0)+
+  geom_vline(xintercept = 0)+
+  theme(legend.position = "none")#+
+  #theme_base()
+```
+
+
+
+
+
+
+## model evenness change
+```{r}
+evenness.1 <- lmer(evenness_delta ~ SPEI_delta + (1|year/site), data = hv_climate_delta) 
+evenness.site <- lmer(evenness_delta~SPEI_delta*site + (1|year) + (1|replicate), data = hv_climate_delta) 
+ 
+evenness.2 <- lmer(evenness_delta ~ SPEI_delta + I(SPEI_delta^2) + (1|year/site), data = hv_climate_delta)
+evenness.3 <- lmer(evenness_delta ~ SPEI_delta  + I(SPEI_delta^2) + I(SPEI_delta^3) + (1|year/site), data = hv_climate_delta)
+evenness.4 <- lmer(evenness_delta ~ SPEI_delta + I(SPEI_delta^2) + I(SPEI_delta^3) + I(SPEI_delta^4) + (1|year/site), data = hv_climate_delta)
+evenness.5 <- lmer(evenness_delta ~ SPEI_delta + I(SPEI_delta^2) + I(SPEI_delta^3) + I(SPEI_delta^4) + I(SPEI_delta^5) + (1|year/site), data = hv_climate_delta)
+
+AICc(evenness.1, evenness.2, evenness.3, evenness.4, evenness.5)
+
+```
+
+```{r}
+summary(evenness.1)
+r.squaredGLMM(evenness.1)
+```
+
+
+```{r}
+summary(evenness.site)
+```
+
+
+## graph evenness change
+
+```{r}
+x <- ggpredict(evenness.1, c("SPEI_delta"))
+plot(x, ci=FALSE)+
+  geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
+  geom_point(data=hv_climate_delta, aes(x=SPEI_delta,y=evenness_delta, colour = site, alpha = .05))+
+  scale_color_viridis(discrete = TRUE, option = "D")+
+  geom_hline(yintercept = 0)+
+  geom_vline(xintercept = 0)+
+  theme_base()
+```
 
 
 
@@ -276,10 +367,77 @@ hv_climate_delta <- hv_climate_prevyear[,c("replicate", "year", "site", "alpha_d
 
 
 
+```{r}
+ggplot(hv_climate_delta, aes(SPEI_delta,evenness_delta))+
+  facet_wrap(~site)+
+  geom_smooth(method = "lm")+
+  geom_point(data=hv_climate_delta, aes(x=SPEI_delta,y=evenness_delta, colour = site, alpha = .05))+
+  scale_color_viridis(discrete = TRUE, option = "D")+
+  geom_hline(yintercept = 0)+
+  geom_vline(xintercept = 0)+
+  theme(legend.position = "none")#+
+  #theme_base()
+```
 
 
 
 
+
+## model dispersion change
+```{r}
+dispersion.1 <- lmer(dispersion_delta ~ SPEI_delta + (1|year/site), data = hv_climate_delta) 
+dispersion.site <- lmer(dispersion_delta~SPEI_delta*site + (1|year) + (1|replicate), data = hv_climate_delta) 
+ 
+dispersion.2 <- lmer(dispersion_delta ~ SPEI_delta + I(SPEI_delta^2) + (1|year/site), data = hv_climate_delta)
+dispersion.3 <- lmer(dispersion_delta ~ SPEI_delta  + I(SPEI_delta^2) + I(SPEI_delta^3) + (1|year/site), data = hv_climate_delta)
+dispersion.4 <- lmer(dispersion_delta ~ SPEI_delta + I(SPEI_delta^2) + I(SPEI_delta^3) + I(SPEI_delta^4) + (1|year/site), data = hv_climate_delta)
+dispersion.5 <- lmer(dispersion_delta ~ SPEI_delta + I(SPEI_delta^2) + I(SPEI_delta^3) + I(SPEI_delta^4) + I(SPEI_delta^5) + (1|year/site), data = hv_climate_delta)
+
+AICc(dispersion.1, dispersion.2, dispersion.3, dispersion.4, dispersion.5)
+
+```
+
+```{r}
+summary(dispersion.1)
+r.squaredGLMM(dispersion.1)
+```
+
+
+```{r}
+summary(dispersion.site)
+```
+
+
+## graph evenness change
+
+```{r}
+x <- ggpredict(dispersion.1, c("SPEI_delta"))
+plot(x, ci=FALSE)+
+  geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
+  geom_point(data=hv_climate_delta, aes(x=SPEI_delta,y=dispersion_delta, colour = site, alpha = .05))+
+  scale_color_viridis(discrete = TRUE, option = "D")+
+  geom_hline(yintercept = 0)+
+  geom_vline(xintercept = 0)+
+  theme_base()
+```
+
+
+
+
+
+
+
+```{r}
+ggplot(hv_climate_delta, aes(SPEI_delta,evenness_delta))+
+  facet_wrap(~site)+
+  geom_smooth(method = "lm")+
+  geom_point(data=hv_climate_delta, aes(x=SPEI_delta,y=dispersion_delta, colour = site, alpha = .05))+
+  scale_color_viridis(discrete = TRUE, option = "D")+
+  geom_hline(yintercept = 0)+
+  geom_vline(xintercept = 0)+
+  theme(legend.position = "none")#+
+  #theme_base()
+```
 
 
 
