@@ -145,7 +145,7 @@ AICc(evenmod.1, evenmod.2, evenmod.3, evenmod.4, evenmod.5)
 summary(evenmod.1)
 r.squaredGLMM(evenmod.1)
 
-summary(evenmod.site)
+
 ```
 
 
@@ -193,7 +193,6 @@ ggplot(hv_climate, aes(SPEI.comp,evenness))+
 
 ```{r}
 dispmod.1 <- lmer(dispersion ~ SPEI.comp + (1|year/site), data = hv_climate)
-dispmod.site <- lmer(dispersion~ SPEI.comp*site + (1|year) + (1|replicate), data = hv_climate)
 
 dispmod.2 <- lmer(dispersion ~ SPEI.comp + I(SPEI.comp^2) + (1|year/site), data = hv_climate)
 dispmod.3 <- lmer(dispersion ~ SPEI.comp  + I(SPEI.comp^2) + I(SPEI.comp^3) + (1|year/site), data = hv_climate)
@@ -206,7 +205,7 @@ AICc(dispmod.1, dispmod.2, dispmod.3, dispmod.4, dispmod.5)
 ```{r}
 summary(dispmod.1)
 r.squaredGLMM(dispmod.1)
-summary(dispmod.site)
+
 ```
 
 
@@ -311,8 +310,7 @@ hv_climate_delta <- hv_climate_prevyear[,c("replicate", "year", "site", "alpha_d
 ## model alpha change
 ```{r}
 alphamod.1 <- lmer(log_alpha_delta ~ SPEI_delta + (1|year/site), data = hv_climate_delta) # for a location, are SPEI changes through time associated with alpha?
-alphamod.site <- lmer(log_alpha_delta~SPEI_delta*site + (1|year) + (1|replicate), data = hv_climate_delta) # within-site diversity change. At whih sites are SPEI changes through time related to alpha?
- 
+
 alphamod.2 <- lmer(log_alpha_delta ~ SPEI_delta + I(SPEI_delta^2) + (1|year/site), data = hv_climate_delta)
 alphamod.3 <- lmer(log_alpha_delta ~ SPEI_delta  + I(SPEI_delta^2) + I(SPEI_delta^3) + (1|year/site), data = hv_climate_delta)
 alphamod.4 <- lmer(log_alpha_delta ~ SPEI_delta + I(SPEI_delta^2) + I(SPEI_delta^3) + I(SPEI_delta^4) + (1|year/site), data = hv_climate_delta)
@@ -327,10 +325,6 @@ summary(alphamod.1)
 r.squaredGLMM(alphamod.1)
 ```
 
-
-```{r}
-summary(alphamod.site)
-```
 
 
 ## graph alpha change
@@ -347,7 +341,16 @@ plot(x, ci=FALSE)+
 ```
 
 
+```{r}
+model.list <- lme4::lmList(log_alpha_delta~SPEI_delta  | site, hv_climate_delta)
+```
 
+```{r}
+
+summary(model.list)
+
+
+```
 
 
 
@@ -372,8 +375,7 @@ ggplot(hv_climate_delta, aes(SPEI_delta,log_alpha_delta))+
 ## model evenness change
 ```{r}
 evenness.1 <- lmer(evenness_delta ~ SPEI_delta + (1|year/site), data = hv_climate_delta) 
-evenness.site <- lmer(evenness_delta~SPEI_delta*site + (1|year) + (1|replicate), data = hv_climate_delta) 
- 
+
 evenness.2 <- lmer(evenness_delta ~ SPEI_delta + I(SPEI_delta^2) + (1|year/site), data = hv_climate_delta)
 evenness.3 <- lmer(evenness_delta ~ SPEI_delta  + I(SPEI_delta^2) + I(SPEI_delta^3) + (1|year/site), data = hv_climate_delta)
 evenness.4 <- lmer(evenness_delta ~ SPEI_delta + I(SPEI_delta^2) + I(SPEI_delta^3) + I(SPEI_delta^4) + (1|year/site), data = hv_climate_delta)
@@ -388,10 +390,6 @@ summary(evenness.1)
 r.squaredGLMM(evenness.1)
 ```
 
-
-```{r}
-summary(evenness.site)
-```
 
 
 ## graph evenness change
@@ -410,7 +408,16 @@ plot(x, ci=FALSE)+
 
 
 
+```{r}
+model.list <- lme4::lmList(evenness_delta~SPEI_delta  | site, hv_climate_delta)
+```
 
+```{r}
+
+summary(model.list)
+
+
+```
 
 
 ```{r}
@@ -432,8 +439,7 @@ ggplot(hv_climate_delta, aes(SPEI_delta,evenness_delta))+
 ## model dispersion change
 ```{r}
 dispersion.1 <- lmer(dispersion_delta ~ SPEI_delta + (1|year/site), data = hv_climate_delta) 
-dispersion.site <- lmer(dispersion_delta~SPEI_delta*site + (1|year) + (1|replicate), data = hv_climate_delta) 
- 
+
 dispersion.2 <- lmer(dispersion_delta ~ SPEI_delta + I(SPEI_delta^2) + (1|year/site), data = hv_climate_delta)
 dispersion.3 <- lmer(dispersion_delta ~ SPEI_delta  + I(SPEI_delta^2) + I(SPEI_delta^3) + (1|year/site), data = hv_climate_delta)
 dispersion.4 <- lmer(dispersion_delta ~ SPEI_delta + I(SPEI_delta^2) + I(SPEI_delta^3) + I(SPEI_delta^4) + (1|year/site), data = hv_climate_delta)
@@ -448,10 +454,6 @@ summary(dispersion.1)
 r.squaredGLMM(dispersion.1)
 ```
 
-
-```{r}
-summary(dispersion.site)
-```
 
 
 ## graph evenness change
@@ -469,7 +471,16 @@ plot(x, ci=FALSE)+
 
 
 
+```{r}
+model.list <- lme4::lmList(dispersion_delta~SPEI_delta  | site, hv_climate_delta)
+```
 
+```{r}
+
+summary(model.list)
+
+
+```
 
 
 
