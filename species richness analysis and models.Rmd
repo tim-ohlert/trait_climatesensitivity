@@ -1,0 +1,129 @@
+---
+title: "make non-trait community metrics"
+author: "Tim Ohlert"
+date: "12/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+### This code is meant to calculate non-trait metrics for all Sevilleta control plots for all time. 
+
+
+
+# Add libraries
+
+
+```{r, message = FALSE}
+library(plyr)
+library(lmerTest)
+library(tidyverse)
+library(viridis)
+library(MuMIn)
+library(ggeffects)
+library(ggthemes)
+
+```
+
+
+# load data and clean
+
+## load plant community data
+
+```{r}
+corebiomass <- read.csv("~/Misc Grad school/Sevilleta_allbiomass_22Jan2020.csv")
+
+```
+
+## reduce data to fall controls and summarize including calculating percent abundance of species within communities
+
+```{r}
+core_5 <- subset(corebiomass,
+                 treatment == "C" &
+                   season == "fall"
+                 )
+
+core_3 <- ddply(core_5, c("site", "year", "web", "transect", "block", "plot", "subplot", "quad", "SPEI.comp"),
+                function(x)data.frame(
+                  sr = length(x$kartez)
+                ))
+
+
+#core_2 <- merge(core_3, core_5, by = c("site", "year", "web", "transect", "block", "plot", "subplot", "quad"))
+#core_2$percent.abundance <- core_2$cover/core_2$plot.cover
+
+#calculate number of species in each plot 
+#core_obs_number <- ddply(core_2, c("site", "year", "web", "transect", "block", "plot", "subplot", "quad"),
+#                         function(x)data.frame(
+#                           obs.number = as.numeric(length(x$kartez))
+#                         ))
+
+#remove plots with only a few species because otherwise the hypervolume doesn't work
+#core_1 <- merge(core_2, core_obs_number, by = c("site", "year", "web", "transect", "block", "plot", "subplot", "quad"))
+#core <- subset(core_1, obs.number > 3)
+```
+
+
+# let's graph some shit
+
+##models
+```{r}
+srmod.1 <- lmer(sr ~ SPEI.comp + (1|year/site), data = core_3)
+srmod.2 <- lmer(sr ~ SPEI.comp + I(SPEI.comp^2) + (1|year/site), data = core_3)
+srmod.3 <- lmer(sr ~ SPEI.comp  + I(SPEI.comp^2) + I(SPEI.comp^3) + (1|year/site), data = core_3)
+srmod.4 <- lmer(sr ~ SPEI.comp + I(SPEI.comp^2) + I(SPEI.comp^3) + I(SPEI.comp^4) + (1|year/site), data = core_3)
+srmod.5 <- lmer(sr ~ SPEI.comp + I(SPEI.comp^2) + I(SPEI.comp^3) + I(SPEI.comp^4) + I(SPEI.comp^5) + (1|year/site), data = core_3)
+
+AICc(srmod.1, srmod.2, srmod.3, srmod.4, srmod.5)
+
+```
+
+```{r}
+summary(srmod.1)
+r.squaredGLMM(srmod.1)
+```
+
+
+
+## graph
+```{r}
+x <- ggpredict(srmod.1, c("SPEI.comp"))
+plot(x, ci=FALSE)+
+  geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
+  geom_point(data=core_3, aes(x=SPEI.comp,y=sr, colour = site, alpha = .05))+
+  scale_color_viridis(discrete = TRUE, option = "D")+
+  theme_base()
+```
+
+
+
+
+```{r}
+model.list <- lme4::lmList(evenness~SPEI.comp  | site, hv_climate)
+```
+
+```{r}
+summary(model.list)
+```
+
+
+
+```{r}
+ggplot(hv_climate, aes(SPEI.comp,evenness))+
+  facet_wrap(~site)+
+  geom_smooth(method = "lm")+
+  geom_point(data=hv_climate, aes(x=SPEI.comp,y=evenness, colour = site))+
+  scale_color_viridis(discrete = TRUE, option = "D")+
+   theme(legend.position = "none")#+
+  #theme_base()
+```
+
+
+
+
+
+
+
