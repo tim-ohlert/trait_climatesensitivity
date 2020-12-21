@@ -36,6 +36,18 @@ library(ggthemes)
 ```{r}
 corebiomass <- read.csv("~/Misc Grad school/Sevilleta_allbiomass_22Jan2020.csv")
 
+corebiomass <- subset(corebiomass, 
+                      site != "crust_creosote" &
+                      site != "crust_grass" &
+                      site != "crust_PJ" &
+                      site != "grid_black" &
+                      site != "grid_blue" &
+                      site != "grid_creosote" &
+                      site != "iso_web" &
+                      site != "tower_west"
+                      )
+
+
 ```
 
 ## reduce data to fall controls and summarize including calculating percent abundance of species within communities
@@ -102,7 +114,7 @@ plot(x, ci=FALSE)+
 
 
 ```{r}
-model.list <- lme4::lmList(evenness~SPEI.comp  | site, hv_climate)
+model.list <- lme4::lmList(sr~SPEI.comp  | site, core_3)
 ```
 
 ```{r}
@@ -112,14 +124,132 @@ summary(model.list)
 
 
 ```{r}
-ggplot(hv_climate, aes(SPEI.comp,evenness))+
+ggplot(core_3, aes(SPEI.comp,sr))+
   facet_wrap(~site)+
   geom_smooth(method = "lm")+
-  geom_point(data=hv_climate, aes(x=SPEI.comp,y=evenness, colour = site))+
+  geom_point(data=core_3, aes(x=SPEI.comp,y=sr, colour = site))+
   scale_color_viridis(discrete = TRUE, option = "D")+
    theme(legend.position = "none")#+
   #theme_base()
 ```
+
+
+
+
+# change between years
+
+                       
+## make delta metrics
+```{r}
+
+#make replicate column
+
+core_3 <- unite(core_3, replicate, c("site","web","plot","quad","transect","plot","subplot"), sep=".",remove=FALSE)
+
+dummy <- core_3
+
+dummy$year <- core_3$year - 1
+
+dummy <- dummy %>% 
+  rename(
+    sr.2 = sr,
+    SPEI.comp.2 = SPEI.comp
+        )
+
+
+dummy <- dummy[,c("replicate","year", "sr.2", "SPEI.comp.2")]
+
+core_3_prevyear <- merge(core_3, dummy, by = c("replicate", "year"))
+
+core_3_prevyear$sr_delta <- core_3_prevyear$sr - core_3_prevyear$sr.2
+core_3_prevyear$SPEI_delta <- core_3_prevyear$SPEI.comp - core_3_prevyear$SPEI.comp.2
+
+
+core_3_delta <- core_3_prevyear[,c("replicate", "year", "site", "sr_delta", "SPEI_delta")]
+
+
+```
+
+
+
+## model alpha change
+```{r}
+srmod.1 <- lmer(sr_delta ~ SPEI_delta + (1|year/site), data = core_3_delta)
+srmod.2 <- lmer(sr_delta ~ SPEI_delta + I(SPEI_delta^2) + (1|year/site), data = core_3_delta)
+srmod.3 <- lmer(sr_delta ~ SPEI_delta  + I(SPEI_delta^2) + I(SPEI_delta^3) + (1|year/site), data = core_3_delta)
+srmod.4 <- lmer(sr_delta ~ SPEI_delta + I(SPEI_delta^2) + I(SPEI_delta^3) + I(SPEI_delta^4) + (1|year/site), data = core_3_delta)
+srmod.5 <- lmer(sr_delta ~ SPEI_delta + I(SPEI_delta^2) + I(SPEI_delta^3) + I(SPEI_delta^4) + I(SPEI_delta^5) + (1|year/site), data = core_3_delta)
+
+AICc(srmod.1, srmod.2, srmod.3, srmod.4, srmod.5)
+
+```
+
+```{r}
+summary(srmod.1)
+r.squaredGLMM(srmod.1)
+```
+
+
+
+## graph alpha change
+
+```{r}
+x <- ggpredict(srmod.1, c("SPEI_delta"))
+plot(x, ci=FALSE)+
+  geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
+  geom_point(data=core_3_delta, aes(x=SPEI_delta,y=sr_delta, colour = site, alpha = .05))+
+  scale_color_viridis(discrete = TRUE, option = "D")+
+  geom_hline(yintercept = 0)+
+  geom_vline(xintercept = 0)+
+  theme_base()
+```
+
+
+
+
+
+
+```{r}
+model.list <- lme4::lmList(sr_delta~SPEI_delta  | site, core_3_delta)
+```
+
+```{r}
+summary(model.list)
+```
+
+
+
+```{r}
+ggplot(core_3_delta, aes(SPEI_delta,sr_delta))+
+  facet_wrap(~site)+
+  geom_smooth(method = "lm")+
+  geom_point(data=core_3_delta, aes(x=SPEI_delta,y=sr_delta, colour = site))+
+  scale_color_viridis(discrete = TRUE, option = "D")+
+  geom_hline(yintercept = 0)+
+  geom_vline(xintercept = 0)+
+   theme(legend.position = "none")#+
+  #theme_base()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
