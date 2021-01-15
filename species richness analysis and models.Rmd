@@ -121,7 +121,23 @@ model.list <- lme4::lmList(sr~SPEI.comp  | site, core_3)
 summary(model.list)
 ```
 
+```{r}
 
+df <-data.frame(change = c("No_change", "Positive", "Negative"),
+                sites = c(9,1,3))
+                          
+df$change <- factor(df$change, levels = c("No_change","Positive","Negative"))
+                           
+
+ggplot(df, aes(change, sites))+
+  geom_bar(stat="identity")+
+  ylim(0,13)+
+  ylab("# of sites")+
+  xlab("")+
+  theme_base()
+
+
+```
 
 ```{r}
 ggplot(core_3, aes(SPEI.comp,sr))+
@@ -217,7 +233,23 @@ model.list <- lme4::lmList(sr_delta~SPEI_delta  | site, core_3_delta)
 summary(model.list)
 ```
 
+```{r}
 
+df <-data.frame(change = c("No_change", "Positive", "Negative"),
+                sites = c(4,1,8))
+                          
+df$change <- factor(df$change, levels = c("No_change","Positive","Negative"))
+                           
+
+ggplot(df, aes(change, sites))+
+  geom_bar(stat="identity")+
+  ylim(0,13)+
+  ylab("# of sites")+
+  xlab("")+
+  theme_base()
+
+
+```
 
 ```{r}
 ggplot(core_3_delta, aes(SPEI_delta,sr_delta))+

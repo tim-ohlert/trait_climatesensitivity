@@ -101,6 +101,23 @@ model.list <- lme4::lmList(log_alpha~SPEI.comp  | site, hv_climate)
 summary(model.list)# within-site diversity change. At whih sites are SPEI changes through time related to alpha?
 
 ```
+```{r}
+
+df <-data.frame(change = c("No_change", "Positive", "Negative"),
+                sites = c(7,0,6))
+                           
+df$change <- factor(df$change, levels = c("No_change","Positive","Negative"))
+                           
+
+ggplot(df, aes(change, sites))+
+  geom_bar(stat="identity")+
+  ylim(0,13)+
+  ylab("# of sites")+
+  xlab("")+
+  theme_base()
+
+
+```
 
 
 
@@ -147,7 +164,8 @@ r.squaredGLMM(evenmod.1)
 x <- ggpredict(evenmod.1, c("SPEI.comp"))
 plot(x, ci=FALSE)+
   geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
-  geom_point(data=hv_climate, aes(x=SPEI.comp,y=evenness), alpha = .05)+
+  geom_point(data=hv_climate, aes(x=SPEI.comp,y=evenness, colour = site, alpha = .05))+
+  scale_color_viridis(discrete = TRUE, option = "D")+
   theme_base()
 ```
 
@@ -160,6 +178,24 @@ model.list <- lme4::lmList(evenness~SPEI.comp  | site, hv_climate)
 
 ```{r}
 summary(model.list)
+```
+
+```{r}
+
+df <-data.frame(change = c("No_change", "Positive", "Negative"),
+                sites = c(9,0,4))
+                           
+df$change <- factor(df$change, levels = c("No_change","Positive","Negative"))
+                           
+
+ggplot(df, aes(change, sites))+
+  geom_bar(stat="identity")+
+  ylim(0,13)+
+  ylab("# of sites")+
+  xlab("")+
+  theme_base()
+
+
 ```
 
 
@@ -203,7 +239,8 @@ r.squaredGLMM(dispmod.1)
 x <- ggpredict(dispmod.1, c("SPEI.comp"))
 plot(x, ci=FALSE)+
   geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
-  geom_point(data=hv_climate, aes(x=SPEI.comp,y=dispersion), alpha = .05)+
+  geom_point(data=hv_climate, aes(x=SPEI.comp,y=dispersion, colour = site, alpha = .05))+
+  scale_color_viridis(discrete = TRUE, option = "D")+
   theme_base()
 ```
 
@@ -218,7 +255,23 @@ model.list <- lme4::lmList(dispersion~SPEI.comp  | site, hv_climate)
 summary(model.list)
 ```
 
+```{r}
 
+df <-data.frame(change = c("No_change", "Positive", "Negative"),
+                sites = c(12,0,1))
+                           
+df$change <- factor(df$change, levels = c("No_change","Positive","Negative"))
+                           
+
+ggplot(df, aes(change, sites))+
+  geom_bar(stat="identity")+
+  ylim(0,13)+
+  ylab("# of sites")+
+  xlab("")+
+  theme_base()
+
+
+```
 
 
 ```{r}
@@ -329,7 +382,23 @@ model.list <- lme4::lmList(log_alpha_delta~SPEI_delta  | site, hv_climate_delta)
 summary(model.list)
 ```
 
+```{r}
 
+df <-data.frame(change = c("No_change", "Positive", "Negative"),
+                sites = c(6,0,7))
+                          
+df$change <- factor(df$change, levels = c("No_change","Positive","Negative"))
+                           
+
+ggplot(df, aes(change, sites))+
+  geom_bar(stat="identity")+
+  ylim(0,13)+
+  ylab("# of sites")+
+  xlab("")+
+  theme_base()
+
+
+```
 
 
 ```{r}
@@ -394,6 +463,45 @@ summary(model.list)
 
 
 ```{r}
+
+df <-data.frame(change = c("No_change", "Positive", "Negative"),
+                sites = c(6,6,1))
+                          
+df$change <- factor(df$change, levels = c("No_change","Positive","Negative"))
+                           
+
+ggplot(df, aes(change, sites))+
+  geom_bar(stat="identity")+
+  ylim(0,13)+
+  ylab("# of sites")+
+  xlab("")+
+  theme_base()
+
+
+```
+
+
+
+```{r}
+
+df <-data.frame(change = c("No_change", "Positive", "Negative"),
+                sites = c(6,0,7))
+                          
+df$change <- factor(df$change, levels = c("No_change","Positive","Negative"))
+                           
+
+ggplot(df, aes(change, sites))+
+  geom_bar(stat="identity")+
+  ylim(0,13)+
+  ylab("# of sites")+
+  xlab("")+
+  theme_base()
+
+
+```
+
+
+```{r}
 ggplot(hv_climate_delta, aes(SPEI_delta,evenness_delta))+
   facet_wrap(~site)+
   geom_smooth(method = "lm")+
@@ -451,10 +559,26 @@ model.list <- lme4::lmList(dispersion_delta~SPEI_delta  | site, hv_climate_delta
 summary(model.list)
 ```
 
+```{r}
 
+df <-data.frame(change = c("No_change", "Positive", "Negative"),
+                sites = c(8,1,4))
+                          
+df$change <- factor(df$change, levels = c("No_change","Positive","Negative"))
+                           
+
+ggplot(df, aes(change, sites))+
+  geom_bar(stat="identity")+
+  ylim(0,13)+
+  ylab("# of sites")+
+  xlab("")+
+  theme_base()
+
+
+```
 
 ```{r}
-ggplot(hv_climate_delta, aes(SPEI_delta,evenness_delta))+
+ggplot(hv_climate_delta, aes(SPEI_delta,dispersion_delta))+
   facet_wrap(~site)+
   geom_smooth(method = "lm")+
   geom_point(data=hv_climate_delta, aes(x=SPEI_delta,y=dispersion_delta, colour = site, alpha = .05))+
