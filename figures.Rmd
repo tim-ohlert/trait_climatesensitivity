@@ -509,23 +509,7 @@ ggplot(df, aes(change, sites))+
 
 
 
-```{r}
 
-df <-data.frame(change = c("No_change", "Positive", "Negative"),
-                sites = c(6,0,7))
-                          
-df$change <- factor(df$change, levels = c("No_change","Positive","Negative"))
-                           
-
-ggplot(df, aes(change, sites))+
-  geom_bar(stat="identity")+
-  ylim(0,13)+
-  ylab("# of sites")+
-  xlab("")+
-  theme_base()
-
-
-```
 
 
 ```{r}
