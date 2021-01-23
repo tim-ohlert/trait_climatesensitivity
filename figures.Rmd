@@ -83,7 +83,10 @@ hist(hv_climate$log_alpha)
 x <- ggpredict(alphamod.1, c("SPEI.comp"))
 plot(x, ci=FALSE)+
   geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
-  geom_point(data=hv_climate, aes(x=SPEI.comp,y=log_alpha, colour = site, alpha = .05))+
+  geom_point(data=hv_climate, aes(x=SPEI.comp,y=log_alpha, colour = site))+
+  xlab("SPEI")+
+  ylab("log(alpha div)")+
+  ggtitle("")+
   scale_color_viridis(discrete = TRUE, option = "D")+
   theme_base()
 ```
@@ -126,6 +129,9 @@ ggplot(hv_climate, aes(SPEI.comp,log_alpha))+
   facet_wrap(~site)+
   geom_smooth(method = "lm")+
   geom_point(data=hv_climate, aes(x=SPEI.comp,y=log_alpha, colour = site, alpha = .05))+
+    xlab("SPEI")+
+  ylab("log(alpha div)")+
+  ggtitle("")+
   scale_color_viridis(discrete = TRUE, option = "D")+
   theme(legend.position = "none")#+
   #theme_base()
@@ -164,7 +170,10 @@ r.squaredGLMM(evenmod.1)
 x <- ggpredict(evenmod.1, c("SPEI.comp"))
 plot(x, ci=FALSE)+
   geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
-  geom_point(data=hv_climate, aes(x=SPEI.comp,y=evenness, colour = site, alpha = .05))+
+  geom_point(data=hv_climate, aes(x=SPEI.comp,y=evenness, colour = site))+
+  xlab("SPEI")+
+  ylab("evenness")+
+  ggtitle("")+
   scale_color_viridis(discrete = TRUE, option = "D")+
   theme_base()
 ```
@@ -205,6 +214,9 @@ ggplot(hv_climate, aes(SPEI.comp,evenness))+
   facet_wrap(~site)+
   geom_smooth(method = "lm")+
   geom_point(data=hv_climate, aes(x=SPEI.comp,y=evenness, colour = site))+
+  xlab("SPEI")+
+  ylab("evenness")+
+  ggtitle("")+
   scale_color_viridis(discrete = TRUE, option = "D")+
    theme(legend.position = "none")#+
   #theme_base()
@@ -239,7 +251,10 @@ r.squaredGLMM(dispmod.1)
 x <- ggpredict(dispmod.1, c("SPEI.comp"))
 plot(x, ci=FALSE)+
   geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
-  geom_point(data=hv_climate, aes(x=SPEI.comp,y=dispersion, colour = site, alpha = .05))+
+  geom_point(data=hv_climate, aes(x=SPEI.comp,y=dispersion, colour = site))+
+  xlab("SPEI")+
+  ylab("dispersion")+
+  ggtitle("")+
   scale_color_viridis(discrete = TRUE, option = "D")+
   theme_base()
 ```
@@ -279,6 +294,9 @@ ggplot(hv_climate, aes(SPEI.comp,dispersion))+
   facet_wrap(~site)+
   geom_smooth(method = "lm")+
   geom_point(data=hv_climate, aes(x=SPEI.comp,y=dispersion, colour = site), alpha = .05)+
+  xlab("SPEI")+
+  ylab("dispersion")+
+  ggtitle("")+
   scale_color_viridis(discrete = TRUE, option = "D")+
    theme(legend.position = "none")#+
   #theme_base()
@@ -366,7 +384,10 @@ r.squaredGLMM(alphamod.1)
 x <- ggpredict(alphamod.1, c("SPEI_delta"))
 plot(x, ci=FALSE)+
   geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
-  geom_point(data=hv_climate_delta, aes(x=SPEI_delta,y=log_alpha_delta, colour = site, alpha = .05))+
+  geom_point(data=hv_climate_delta, aes(x=SPEI_delta,y=log_alpha_delta, colour = site))+
+  xlab("Change in SPEI")+
+  ylab("Change in log(alpha div)")+
+  ggtitle("")+
   scale_color_viridis(discrete = TRUE, option = "D")+
   geom_hline(yintercept = 0)+
   geom_vline(xintercept = 0)+
@@ -406,6 +427,9 @@ ggplot(hv_climate_delta, aes(SPEI_delta,log_alpha_delta))+
   facet_wrap(~site)+
   geom_smooth(method = "lm")+
   geom_point(data=hv_climate_delta, aes(x=SPEI_delta,y=log_alpha_delta, colour = site, alpha = .05))+
+  xlab("Change in SPEI")+
+  ylab("Change in log(alpha div)")+
+  ggtitle("")+
   scale_color_viridis(discrete = TRUE, option = "D")+
   geom_hline(yintercept = 0)+
   geom_vline(xintercept = 0)+
@@ -443,7 +467,10 @@ r.squaredGLMM(evenness.1)
 x <- ggpredict(evenness.1, c("SPEI_delta"))
 plot(x, ci=FALSE)+
   geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
-  geom_point(data=hv_climate_delta, aes(x=SPEI_delta,y=evenness_delta, colour = site, alpha = .05))+
+  geom_point(data=hv_climate_delta, aes(x=SPEI_delta,y=evenness_delta, colour = site))+
+  xlab("Change in SPEI")+
+  ylab("Change in evenness")+
+  ggtitle("")+
   scale_color_viridis(discrete = TRUE, option = "D")+
   geom_hline(yintercept = 0)+
   geom_vline(xintercept = 0)+
@@ -506,6 +533,9 @@ ggplot(hv_climate_delta, aes(SPEI_delta,evenness_delta))+
   facet_wrap(~site)+
   geom_smooth(method = "lm")+
   geom_point(data=hv_climate_delta, aes(x=SPEI_delta,y=evenness_delta, colour = site, alpha = .05))+
+  xlab("Change in SPEI")+
+  ylab("Change in evenness")+
+  ggtitle("")+
   scale_color_viridis(discrete = TRUE, option = "D")+
   geom_hline(yintercept = 0)+
   geom_vline(xintercept = 0)+
@@ -542,7 +572,10 @@ r.squaredGLMM(dispersion.1)
 x <- ggpredict(dispersion.1, c("SPEI_delta"))
 plot(x, ci=FALSE)+
   geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
-  geom_point(data=hv_climate_delta, aes(x=SPEI_delta,y=dispersion_delta, colour = site, alpha = .05))+
+  geom_point(data=hv_climate_delta, aes(x=SPEI_delta,y=dispersion_delta, colour = site))+
+  xlab("Change in SPEI")+
+  ylab("Change in dispersion")+
+  ggtitle("")+
   scale_color_viridis(discrete = TRUE, option = "D")+
   geom_hline(yintercept = 0)+
   geom_vline(xintercept = 0)+
@@ -582,6 +615,9 @@ ggplot(hv_climate_delta, aes(SPEI_delta,dispersion_delta))+
   facet_wrap(~site)+
   geom_smooth(method = "lm")+
   geom_point(data=hv_climate_delta, aes(x=SPEI_delta,y=dispersion_delta, colour = site, alpha = .05))+
+  xlab("Change in SPEI")+
+  ylab("Change in dispersion")+
+  ggtitle("")+
   scale_color_viridis(discrete = TRUE, option = "D")+
   geom_hline(yintercept = 0)+
   geom_vline(xintercept = 0)+

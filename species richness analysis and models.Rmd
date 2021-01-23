@@ -105,7 +105,10 @@ r.squaredGLMM(srmod.1)
 x <- ggpredict(srmod.1, c("SPEI.comp"))
 plot(x, ci=FALSE)+
   geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
-  geom_point(data=core_3, aes(x=SPEI.comp,y=sr, colour = site, alpha = .05))+
+  geom_point(data=core_3, aes(x=SPEI.comp,y=sr, colour = site))+
+  xlab("SPEI")+
+  ylab("Species richness")+
+  ggtitle("")+
   scale_color_viridis(discrete = TRUE, option = "D")+
   theme_base()
 ```
@@ -144,6 +147,9 @@ ggplot(core_3, aes(SPEI.comp,sr))+
   facet_wrap(~site)+
   geom_smooth(method = "lm")+
   geom_point(data=core_3, aes(x=SPEI.comp,y=sr, colour = site))+
+  xlab("SPEI")+
+  ylab("Species richness")+
+  ggtitle("")+
   scale_color_viridis(discrete = TRUE, option = "D")+
    theme(legend.position = "none")#+
   #theme_base()
@@ -213,7 +219,10 @@ r.squaredGLMM(srmod.1)
 x <- ggpredict(srmod.1, c("SPEI_delta"))
 plot(x, ci=FALSE)+
   geom_ribbon(aes(ymin=predicted-std.error,ymax=predicted+std.error), alpha =.5)+
-  geom_point(data=core_3_delta, aes(x=SPEI_delta,y=sr_delta, colour = site, alpha = .05))+
+  geom_point(data=core_3_delta, aes(x=SPEI_delta,y=sr_delta, colour = site))+
+  xlab("Change in SPEI")+
+  ylab("Change in species richness")+
+  ggtitle("")+
   scale_color_viridis(discrete = TRUE, option = "D")+
   geom_hline(yintercept = 0)+
   geom_vline(xintercept = 0)+
@@ -256,6 +265,9 @@ ggplot(core_3_delta, aes(SPEI_delta,sr_delta))+
   facet_wrap(~site)+
   geom_smooth(method = "lm")+
   geom_point(data=core_3_delta, aes(x=SPEI_delta,y=sr_delta, colour = site))+
+  xlab("Change in SPEI")+
+  ylab("Change in species richness")+
+  ggtitle("")+
   scale_color_viridis(discrete = TRUE, option = "D")+
   geom_hline(yintercept = 0)+
   geom_vline(xintercept = 0)+
